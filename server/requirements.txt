@@ -1,0 +1,11 @@
+# screenpoint
+photoshop-connection
+Flask
+flask-cors
+pyscreenshot
+pyautogui
+pygetwindow
+Pillow
+requests
+itsdangerous
+Werkzeug
