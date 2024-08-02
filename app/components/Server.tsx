@@ -1,6 +1,6 @@
 import { decode, encode } from 'base-64';
 
-const URL = "http://172.25.224.1:8080";
+const URL = "https://Minor-Project.onrender.com";
 // const URL = "http://192.168.43.242:8080";
 // const URL = "http://192.168.43.242:8080";
 
