@@ -9,3 +9,4 @@ Pillow
 requests
 itsdangerous
 Werkzeug
+pywin32
