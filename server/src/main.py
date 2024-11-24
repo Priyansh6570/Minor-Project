@@ -5,24 +5,18 @@ from flask_cors import CORS
 from PIL import Image
 import win32clipboard
 from io import BytesIO
-
-# import numpy as np
-# import screenpoint 
 import pyautogui 
 import pygetwindow 
 import pyscreenshot
+import subprocess
 import requests  
 import time 
-# from datetime import datetime
 import logging
 import argparse 
-
-# import ps
 
 logging.basicConfig(level=logging.INFO)
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('--photoshop_password', default='123456')
 parser.add_argument('--basnet_service_ip', required=True, help="The BASNet service IP address")
 parser.add_argument('--basnet_service_host', help="Optional, the BASNet service host")
 args = parser.parse_args()
@@ -48,44 +42,48 @@ def ping():
 @app.route('/cut', methods=['POST'])
 def save():
     start = time.time()
-    logging.info(' CUT')
-    data1 = request.files.get('data', None)
-    logging.info(' data : ' + str(data1))
+    logging.info('CUT')
+    
     if 'data' not in request.files:
         return jsonify({
             'status': 'error',
             'error': 'missing file param `data`'
         }), 400
-    data = request.files['data'].read()
+    
+    data1 = request.files['data']
+    logging.info(f'data : {data1}')
+    
+    data = data1.read()
     if len(data) == 0:
         return jsonify({'status:': 'error', 'error': 'empty image'}), 400
 
     with open('cut_received.jpg', 'wb') as f:
         f.write(data)
 
-    logging.info(' > sending to BASNet...')
+    logging.info('> sending to BASNet...')
     headers = {}
-    if args.basnet_service_host is not None:
+    if 'basnet_service_host' in globals() and args.basnet_service_host is not None:
         headers['Host'] = args.basnet_service_host
-    files= {'data': open('cut_received.jpg', 'rb')} 
-    res = requests.post(args.basnet_service_ip, headers=headers, files=files )
+    files = {'data': open('cut_received.jpg', 'rb')} 
+    res = requests.post(args.basnet_service_ip, headers=headers, files=files)
 
-    logging.info(' > saving results...')
+    logging.info('> saving results...')
     with open('cut_mask.png', 'wb') as f:
         f.write(res.content)
 
-    logging.info(' > opening mask...')
-    mask = Image.open('cut_mask.png').convert("L").resize((256,256),resample=Image.BICUBIC, reducing_gap=2.0)
+    logging.info('> opening mask...')
+    mask = Image.open('cut_mask.png').convert("L")
 
     logging.info('compositing final image...')
     ref = Image.open(io.BytesIO(data))
     empty = Image.new("RGBA", ref.size, 0)
+    
+    mask = mask.resize(ref.size, resample=Image.BICUBIC, reducing_gap=2.0)
+
     img = Image.composite(ref, empty, mask)
 
-    img_scaled = img.resize((img.size[0] * 3, img.size[1] * 3))
-
     logging.info('saving final image...')
-    img_scaled.save('cut_current.png')
+    img.save('cut_current.png')
 
     buff = io.BytesIO()
     img.save(buff, 'PNG')
@@ -100,21 +98,6 @@ def save():
 def paste():
     start = time.time()
     logging.info('PASTE')
-
-    if 'data' not in request.files:
-        return jsonify({'status': 'error', 'error': 'missing file param `data`'}), 400
-    data = request.files['data'].read()
-    if len(data) == 0:
-        return jsonify({'status': 'error', 'error': 'empty image'}), 400
-
-    with open('paste_received.png', 'wb') as f:
-        f.write(data)
-
-    logging.info('> loading image...')
-    view = Image.open(io.BytesIO(data))
-
-    if view.size[0] > max_view_size or view.size[1] > max_view_size:
-        view.thumbnail((max_view_size, max_view_size))
 
     logging.info('> grabbing screenshot...')
     screen = pyscreenshot.grab()
@@ -131,23 +114,40 @@ def paste():
         y = int(y / screen.size[1] * screen_height)
         logging.info(f'{x}, {y}')
 
-        send_to_clipboard(data)
+        send_to_clipboard()
 
-        active_window = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())[0]
+        active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
 
-        logging.info(f'> simulating paste into {active_window.title}...')
-        active_window.activate()
-        time.sleep(1) 
-        pyautogui.click(active_window.left + x, active_window.top + y)
-        pyautogui.hotkey('ctrl', 'v')
+        logging.info(f'> simulating paste into {active_windows[0].title}')
+        if active_windows[0].title!='Program Manager' and active_windows[0].title!='':
+            active_window = active_windows[0]
+
+            logging.info(f'> simulating paste into {active_window.title}...')
+            active_window.activate()
+            time.sleep(1) 
+            pyautogui.click(active_window.left + x, active_window.top + y)
+            pyautogui.hotkey('ctrl', 'v')
+        else:
+            logging.info('No active window found. Opening Paint...')
+
+            # Open Paint using subprocess
+            subprocess.run('mspaint', shell=True)
+            time.sleep(2)  # Wait for Paint to open
+            active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
+            activ_win = active_windows[0]
+            activ_win.activate()
+            time.sleep(1)
+            logging.info('> pasting into Paint...')
+            pyautogui.click(active_window.left + x, active_window.top + y)
+            pyautogui.hotkey('ctrl', 'v')
     else:
         logging.info('Screen not found')
 
     logging.info(f'Completed in {time.time() - start:.2f}s')
     return jsonify({'status': 'ok'})
 
-def send_to_clipboard(image_data):
-    image = Image.open(BytesIO(image_data))
+def send_to_clipboard():
+    image = Image.open('cut_current.png')
     output = BytesIO()
     image.save(output, format="PNG")
     data = output.getvalue()
@@ -155,13 +155,10 @@ def send_to_clipboard(image_data):
 
     win32clipboard.OpenClipboard()
     win32clipboard.EmptyClipboard()
-    # format for PNG
     win32clipboard.SetClipboardData(win32clipboard.RegisterClipboardFormat("PNG"), data)
     win32clipboard.CloseClipboard()
 
 if __name__ == '__main__':
     os.environ['FLASK_DEBUG'] = 'development'
     port = int(os.environ.get('PORT', 8080))
-    # app.run(debug=True, host='192.168.43.242', port=port)
-    app.run(debug=True, host='172.25.224.1', port=port)
-    # app.run(debug=True, host='192.168.43.242', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)

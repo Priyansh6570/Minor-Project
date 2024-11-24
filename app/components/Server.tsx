@@ -1,8 +1,6 @@
 import { decode, encode } from 'base-64';
 
-const URL = "http://172.25.224.1:8080";
-// const URL = "http://192.168.43.242:8080";
-// const URL = "http://192.168.43.242:8080";
+const URL = "http://192.168.253.243:8080";
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = "";
@@ -57,17 +55,3 @@ export default {
   cut,
   paste,
 };
-
-// function dataURItoBlob(dataURI: string): Blob {
-//   const byteString = decode(dataURI.split(',')[1]);
-//   const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-//   const arrayBuffer = new ArrayBuffer(byteString.length);
-//   const dataView = new DataView(arrayBuffer);
-
-//   for (let i = 0; i < byteString.length; i++) {
-//     dataView.setUint8(i, byteString.charCodeAt(i));
-//   }
-
-//   return new Blob([arrayBuffer], { type: mimeString });
-// }

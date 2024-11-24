@@ -8,8 +8,6 @@ server/*.png
 server/*.jpg
 *.psd
 app/node_modules
-app/README.md
-README.md
 app/%ProgramData%
 app/.expo
 app/.expo-shared

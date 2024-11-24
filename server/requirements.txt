@@ -1,5 +1,4 @@
 # screenpoint
-photoshop-connection
 Flask
 flask-cors
 pyscreenshot
@@ -9,3 +8,4 @@ Pillow
 requests
 itsdangerous
 Werkzeug
+pywin32
