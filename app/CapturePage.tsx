@@ -69,7 +69,7 @@ export default function CapturePage({ navigation }) {
       setPressed(false);
       setPasting(false);
       setProcessedImage(null);
-      navigation.navigate("HomePage"); // Redirect to home after pasting
+      navigation.navigate("HomePage");
     }
   };
 

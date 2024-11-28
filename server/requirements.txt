@@ -1,4 +1,3 @@
-# screenpoint
 Flask
 flask-cors
 pyscreenshot

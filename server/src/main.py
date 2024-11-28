@@ -130,9 +130,8 @@ def paste():
         else:
             logging.info('No active window found. Opening Paint...')
 
-            # Open Paint using subprocess
             subprocess.run('mspaint', shell=True)
-            time.sleep(2)  # Wait for Paint to open
+            time.sleep(2)
             active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
             activ_win = active_windows[0]
             activ_win.activate()

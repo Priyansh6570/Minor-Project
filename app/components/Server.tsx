@@ -1,6 +1,6 @@
 import { decode, encode } from "base-64";
 
-let URL = ""; // Initially empty
+let URL = "";
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = "";
@@ -10,7 +10,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 }
 
 function updateURL(newURL: string) {
-  URL = newURL; // Dynamically update the URL
+  URL = newURL;
   console.log("Updated URL:", URL);
 }
 
@@ -61,7 +61,7 @@ async function paste(imageURI: string) {
 }
 
 export default {
-  updateURL, // Export the new function
+  updateURL,
   ping,
   cut,
   paste,

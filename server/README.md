@@ -1,4 +1,7 @@
-# BASNET Open URIs
+## Desktop App startup command
+```bash
+python gui.py
+```
 
 ## Service URLs
 - BASNET Predictor: http://basnet-predictor.tenant-compass.global.coreweave.com/
