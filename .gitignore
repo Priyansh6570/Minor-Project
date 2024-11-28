@@ -4,8 +4,8 @@ venv
 .pyc
 node_modules
 __pycache__
-server/*.png
-server/*.jpg
+# server/*.png
+# server/*.jpg
 *.psd
 app/node_modules
 app/%ProgramData%

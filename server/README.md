@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
 4. Add Absolute path to your python.exe from venv/scripts in your gui.py
 
-![Add path here](https://ray.so/jEgbNU5)
+![Add path here](image.png)
 <!-- ![alt text](image.png) -->
 
 
