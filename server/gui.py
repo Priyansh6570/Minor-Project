@@ -8,7 +8,7 @@ from PIL import Image, ImageTk
 
 def start_backend():
     backend_command = [
-        "Absolute path to python.exe from your virtual environment",
+        "C:/Users/Lenovo/Desktop/Minor Project/main/server/venv/Scripts/python.exe",
         "src/main.py",
         "--basnet_service_ip", "http://u2net-predictor.tenant-compass.global.coreweave.com/"
     ]

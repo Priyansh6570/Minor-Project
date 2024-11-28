@@ -7,7 +7,7 @@ python gui.py
 - BASNET Predictor: http://basnet-predictor.tenant-compass.global.coreweave.com/
 - U2NET Predictor: http://u2net-predictor.tenant-compass.global.coreweave.com/
 
-## Installation
+# Installation
 
 ### Setting Up Virtual Environment
 
@@ -30,6 +30,12 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+4. Add Absolute path to your python.exe from venv/scripts in your gui.py
+
+![Add path here](https://ray.so/jEgbNU5)
+<!-- ![alt text](image.png) -->
+
 
 ## Running the Backend
 
