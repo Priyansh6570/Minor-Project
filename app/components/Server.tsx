@@ -1,6 +1,6 @@
-import { decode, encode } from 'base-64';
+import { decode, encode } from "base-64";
 
-const URL = "http://192.168.253.243:8080";
+let URL = ""; // Initially empty
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = "";
@@ -9,7 +9,16 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return encode(binary);
 }
 
+function updateURL(newURL: string) {
+  URL = newURL; // Dynamically update the URL
+  console.log("Updated URL:", URL);
+}
+
 function ping() {
+  if (!URL) {
+    console.error("URL is not set. Cannot ping.");
+    return;
+  }
   fetch(URL + "/ping").catch((e) => console.error(e));
 }
 
@@ -34,6 +43,7 @@ async function cut(imageURI: string) {
 
   return resp;
 }
+
 async function paste(imageURI: string) {
   const formData = new FormData();
   formData.append("data", {
@@ -51,6 +61,7 @@ async function paste(imageURI: string) {
 }
 
 export default {
+  updateURL, // Export the new function
   ping,
   cut,
   paste,

@@ -14,7 +14,7 @@ import time
 import logging
 import argparse 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--basnet_service_ip', required=True, help="The BASNet service IP address")
