@@ -7,7 +7,7 @@ import win32clipboard
 from io import BytesIO
 import pyautogui 
 import pygetwindow 
-import pyscreenshot
+# import pyscreenshot
 import subprocess
 import requests  
 import time 
@@ -38,6 +38,11 @@ def ping():
     r = requests.get(args.basnet_service_ip, headers={'Host': args.basnet_service_host})
     logging.info(f'pong: {r.status_code} {r.content}')
     return 'pong'
+
+@app.route('/health-check', methods=['GET'])
+def health_check():
+    logging.info('health-check')
+    return jsonify({"status": "ok", "message": "Backend is connected!"}), 200
 
 @app.route('/cut', methods=['POST'])
 def save():
@@ -99,48 +104,27 @@ def paste():
     start = time.time()
     logging.info('PASTE')
 
-    logging.info('> grabbing screenshot...')
-    screen = pyscreenshot.grab()
-    screen_width, screen_height = screen.size
+    send_to_clipboard()
 
-    if screen.size[0] > max_screenshot_size or screen.size[1] > max_screenshot_size:
-        screen.thumbnail((max_screenshot_size, max_screenshot_size))
+    active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
 
-    logging.info('> finding projected point...')
-    x, y = screen.size[0] / 2, screen.size[1] / 2
+    logging.info(f'> simulating paste into {active_windows[0].title}')
+    if active_windows[0].title!='Program Manager' and active_windows[0].title!='':
+        active_window = active_windows[0]
 
-    if x != -1 and y != -1:
-        x = int(x / screen.size[0] * screen_width)
-        y = int(y / screen.size[1] * screen_height)
-        logging.info(f'{x}, {y}')
-
-        send_to_clipboard()
-
-        active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
-
-        logging.info(f'> simulating paste into {active_windows[0].title}')
-        if active_windows[0].title!='Program Manager' and active_windows[0].title!='':
-            active_window = active_windows[0]
-
-            logging.info(f'> simulating paste into {active_window.title}...')
-            active_window.activate()
-            time.sleep(1) 
-            pyautogui.click(active_window.left + x, active_window.top + y)
-            pyautogui.hotkey('ctrl', 'v')
-        else:
-            logging.info('No active window found. Opening Paint...')
-
-            subprocess.run('mspaint', shell=True)
-            time.sleep(2)
-            active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
-            activ_win = active_windows[0]
-            activ_win.activate()
-            time.sleep(1)
-            logging.info('> pasting into Paint...')
-            pyautogui.click(active_window.left + x, active_window.top + y)
-            pyautogui.hotkey('ctrl', 'v')
+        logging.info(f'> simulating paste into {active_window.title}...')
+        active_window.activate()
+        pyautogui.hotkey('ctrl', 'v')
     else:
-        logging.info('Screen not found')
+        logging.info('No active window found. Opening Paint...')
+
+        subprocess.run('mspaint', shell=True)
+        time.sleep(2)
+        active_windows = pygetwindow.getWindowsWithTitle(pygetwindow.getActiveWindowTitle())
+        activ_win = active_windows[0]
+        activ_win.activate()
+        logging.info('> pasting into Paint...')
+        pyautogui.hotkey('ctrl', 'v')
 
     logging.info(f'Completed in {time.time() - start:.2f}s')
     return jsonify({'status': 'ok'})

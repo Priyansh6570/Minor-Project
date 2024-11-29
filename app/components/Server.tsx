@@ -1,6 +1,7 @@
 import { decode, encode } from "base-64";
 
 let URL = "";
+let pcName = "";
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = "";
@@ -9,9 +10,23 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return encode(binary);
 }
 
-function updateURL(newURL: string) {
+function updateURL(newURL: string, Name: string) {
   URL = newURL;
+  pcName = Name;
   console.log("Updated URL:", URL);
+  console.log("PC Name:", pcName);
+}
+
+async function healthCheck() {
+  if (!URL) throw new Error("URL not set.");
+
+  try {
+    const response = await fetch(`${URL}/health-check`);
+    const data = await response.json();
+    if (data.status === "ok") return true;
+  } catch {
+    return false;
+  }
 }
 
 function ping() {
@@ -65,4 +80,7 @@ export default {
   ping,
   cut,
   paste,
+  healthCheck,
+  getPCName: () => pcName,
+  getURL: () => URL,
 };

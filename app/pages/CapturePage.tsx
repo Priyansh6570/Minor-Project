@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import server from "./components/Server";
-import ProgressIndicator from "./components/ProgressIndicator";
+import server from "../components/Server";
+import ProgressIndicator from "../components/ProgressIndicator";
 
 const styles = StyleSheet.create({
   container: {
@@ -47,6 +47,10 @@ export default function CapturePage({ navigation }) {
   const [pressed, setPressed] = useState(false);
   const [pasting, setPasting] = useState(false);
 
+  useEffect(() => {
+    pickImage();
+  }, []);
+
   const pickImage = async () => {
     setPressed(true);
     const result = await ImagePicker.launchCameraAsync({
@@ -69,29 +73,29 @@ export default function CapturePage({ navigation }) {
       setPressed(false);
       setPasting(false);
       setProcessedImage(null);
-      navigation.navigate("HomePage");
+      navigation.navigate("NewHomePage");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.cameraContainer}>
-        <Image
-          source={{ uri: processedImage || "/" }}
-          style={styles.resultImg}
-        />
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={pickImage}>
-            <Text style={styles.buttonText}>Take Photo</Text>
-          </TouchableOpacity>
-          {processedImage && (
+        <Camera style={styles.cameraContainer}>
+          <Image
+            source={{ uri: processedImage || "/" }}
+            style={styles.resultImg}
+            />
+          <View style={styles.buttonContainer}>
+            {processedImage && (
             <TouchableOpacity style={styles.button} onPress={pasteImage}>
               <Text style={styles.buttonText}>Paste</Text>
             </TouchableOpacity>
-          )}
-        </View>
-      </Camera>
-      {(pressed && !processedImage) || pasting ? <ProgressIndicator /> : null}
+        )}
+          </View>
+        </Camera>
+      {pressed && !processedImage ? (
+        <ProgressIndicator status={"Proecssing..."} />
+      ) : null}
+      {pasting ? <ProgressIndicator status={"Pasting"} /> : null}
     </View>
   );
 }

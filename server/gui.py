@@ -1,14 +1,14 @@
-import os
 import subprocess
+import requests
 import socket
 import threading
 import qrcode
-from tkinter import Tk, Label, PhotoImage
+from tkinter import Tk, Label
 from PIL import Image, ImageTk
 
 def start_backend():
     backend_command = [
-        "C:/Users/Lenovo/Desktop/Minor Project/main/server/venv/Scripts/python.exe",
+        "Absolute Path to python.exe",
         "src/main.py",
         "--basnet_service_ip", "http://u2net-predictor.tenant-compass.global.coreweave.com/"
     ]
@@ -33,8 +33,9 @@ def get_local_ip():
     return socket.gethostbyname(hostname)
 
 def generate_qr(port=8080):
+    hostname = socket.gethostname()
     ip = get_local_ip()
-    url = f"http://{ip}:{port}"
+    url = f"http://{ip}:{port}|{hostname}"
     qr = qrcode.make(url)
     qr.save("qrcode.png")
     return url
@@ -59,7 +60,6 @@ def create_gui(qr_url):
     success_label.pack(pady=20)
 
     def listen_for_ping():
-        import requests
         while True:
             try:
                 response = requests.get(f"{qr_url}/ping")

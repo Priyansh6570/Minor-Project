@@ -1,74 +1,98 @@
 import React, { useState, useEffect } from "react";
-import { View, Animated, StyleSheet } from "react-native";
-import Svg, { Circle } from "react-native-svg";
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
-const numX = 4;
-const numY = 5;
-const total = numX * numY;
+import { View, Animated, StyleSheet, Text } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#00000090",
+  },
+  disk: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 5,
+    borderColor: "white",
+    position: "absolute",
+  },
+  text: {
+    marginTop: 210,
+    color: "white",
+    position: "relative",
+    top: 10,
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
-export default function ProgressIndicator() {
-  const init = Array(total)
-    .fill(1)
-    .map((x) => ({ r: new Animated.Value(1), a: new Animated.Value(1) }));
-  const [anim, setAnim] = useState(init);
+
+interface ProgressIndicatorProps {
+  status: string;
+}
+
+export default function ProgressIndicator({ status }: ProgressIndicatorProps) {
+  const [rotationAnim1, setRotationAnim1] = useState(new Animated.Value(0));
+  const [rotationAnim2, setRotationAnim2] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    console.log("update");
-    const c = anim.map((v, i: number) => {
-      const t = 400 + Math.random() * 300;
-      const seq = Animated.parallel([
-        Animated.sequence([
-          Animated.timing(anim[i].r, { toValue: 3, duration: t - 50, useNativeDriver: true }),
-          Animated.timing(anim[i].r, { toValue: 1, duration: t, useNativeDriver: true }),
-        ]),
-        Animated.sequence([
-          Animated.timing(anim[i].a, { toValue: 0.1, duration: t - 50, useNativeDriver: true }),
-          Animated.timing(anim[i].a, { toValue: 1, duration: t, useNativeDriver: true }),
-        ]),
-      ]);
-      
-      return Animated.loop(seq);
-    });
-    Animated.parallel(c).start();
-  }, []);
+    const rotate1 = Animated.loop(
+      Animated.timing(rotationAnim1, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      })
+    );
 
-  let circles = [];
-  const margin = 100 / (numX);
-  for (let x = 0; x < numX; x++) {
-    for (let y = 0; y < numY; y++) {
-      const i = y * numX + x;
-      circles.push({
-        x: (x + 0.5) * margin,
-        y: (y) * margin,
-        r: anim[i].r,
-        a: anim[i].a,
-      });
-    }
-  }
+    const rotate2 = Animated.loop(
+      Animated.timing(rotationAnim2, {
+        toValue: 1,
+        duration: 2500,
+        useNativeDriver: true,
+      })
+    );
+
+    rotate1.start();
+    rotate2.start();
+  }, [rotationAnim1, rotationAnim2]);
+
+  const rotation1 = rotationAnim1.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  const rotation2 = rotationAnim2.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   return (
     <View style={styles.container}>
-      <Svg height="100%" width="100%" viewBox="0 0 100 100">
-        {circles.map((c) => (
-          <AnimatedCircle
-            key={c.y * numX + c.x}
-            cx={c.x}
-            cy={c.y}
-            r={c.r}
-            fill="white"
-            opacity={c.a}
-          />
-        ))}
-      </Svg>
+      <Animated.View
+        style={[
+          styles.disk,
+          {
+            transform: [
+              { rotateX: rotation1 },
+              { rotateY: rotation1 },
+            ],
+          },
+        ]}
+      />
+      
+      <Animated.View
+        style={[
+          styles.disk,
+          {
+            transform: [
+              { rotateX: rotation2 },
+              { rotateY: rotation2 },
+            ],
+          },
+        ]}
+      />
+      
+      <Text style={styles.text}>{status}</Text>
     </View>
   );
 }
